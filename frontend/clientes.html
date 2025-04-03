@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        form { width: 300px; margin: auto; display: flex; flex-direction: column; }
+        input, button { margin: 5px 0; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Gestión de Clientes</h1>
+
+    <h2>Registro</h2>
+    <form id="registro-form">
+        <input type="text" id="reg-nombre" placeholder="Nombre" required>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="password" id="reg-password" placeholder="Contraseña" required>
+        <button type="submit">Registrarse</button>
+    </form>
+
+    <h2>Login</h2>
+    <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Contraseña" required>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    <h2>Clientes</h2>
+    <button onclick="verClientes()">Ver Clientes</button>
+    
+  
+    <button onclick="cerrarSesion()" style="background-color: red; color: white;">Cerrar Sesión</button>
+
+    <h3>Agregar Cliente</h3>
+    <form id="cliente-form">
+        <input type="text" id="cli-nombre" placeholder="Nombre" required>
+        <input type="email" id="cli-email" placeholder="Email" required>
+        <input type="text" id="cli-telefono" placeholder="Teléfono" required>
+        <button type="submit">Agregar Cliente</button>
+    </form>
+
+    <ul id="clientes-list"></ul>
+
+    <script>
+        document.getElementById("registro-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const nombre = document.getElementById("reg-nombre").value;
+            const email = document.getElementById("reg-email").value;
+            const password = document.getElementById("reg-password").value;
+
+            const response = await fetch("http://localhost:3000/registro", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre, email, password })
+            });
+
+            alert(await response.text());
+        });
+
+        document.getElementById("login-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+
+            const response = await fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+                alert("Login exitoso!");
+            } else {
+                alert("Error en login");
+            }
+        });
+
+        async function verClientes() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Debe iniciar sesión primero.");
+                return;
+            }
+
+            const response = await fetch("http://localhost:3000/clientes", {
+                headers: { "Authorization": token }
+            });
+
+            const clientes = await response.json();
+            document.getElementById("clientes-list").innerHTML =
+                clientes.map(cliente => 
+                    `<li>${cliente.nombre} - ${cliente.email} 
+                    <button onclick="eliminarCliente(${cliente.id})">❌</button></li>`
+                ).join("");
+        }
+
+        async function eliminarCliente(id) {
+            await fetch(`http://localhost:3000/clientes/${id}`, { 
+                method: "DELETE", 
+                headers: { "Authorization": localStorage.getItem("token") } 
+            });
+            verClientes();
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem("token");
+            alert("Sesión cerrada");
+            location.reload();
+        }
+    </script>
+
+</body>
+</html>
