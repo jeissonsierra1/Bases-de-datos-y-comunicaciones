@@ -39,7 +39,8 @@ El sistema permite la administración eficiente de pedidos, clientes, transporti
 - ├── node_modules/
 - ├── package-lock.json
 - ├── package.json
-- └── server.js
+- ├── server.js
+- └── techlogistics_db.sql
 
 # Requisitos Previos
 
@@ -53,11 +54,9 @@ El sistema permite la administración eficiente de pedidos, clientes, transporti
    https://github.com/jeissonsierra1/Bases-de-datos-y-comunicaciones.git
 ``
 - Instala las dependencias:
-npm install
-
 - Configura la base de datos:
 
-  Importa el esquema de la base de datos 
+  techlogistics_db.sql
 
 # Tecnologías Utilizadas
 
